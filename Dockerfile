@@ -3,6 +3,9 @@ FROM python:3.9-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     espeak-ng \
+    git \
+    build-essential \
+    gcc \
  && rm -rf /var/lib/apt/lists/*
 
 
@@ -13,6 +16,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 RUN pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118  --index-url https://download.pytorch.org/whl/cu118
 
+RUN python -m nltk.downloader punkt punkt_tab
 
 COPY . /app
 

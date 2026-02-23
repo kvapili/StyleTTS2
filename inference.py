@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torchaudio
 import librosa
-import nltk
+from nltk.tokenize import word_tokenize
 
 # Your project imports
 from munch import Munch
@@ -138,8 +138,7 @@ class TTSInference:
         # ---- Text preprocessing ----
         text = text.strip().replace('"', "")
         phones = self.phonemizer.phonemize([text])[0]
-        nltk.download('punkt_tab')
-        phones = " ".join(nltk.tokenize.word_tokenize(phones))
+        phones = " ".join(word_tokenize(phones))
 
         tokens = self.text_cleaner(phones)
         tokens.insert(0, 0)
