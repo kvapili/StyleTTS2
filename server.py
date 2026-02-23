@@ -16,9 +16,7 @@ from pydantic import BaseModel
 import uvicorn
 import httpx
 
-from providers.piper import load_piper_model, synthesize as piper_synthesize
-from providers.kokoro import KokoroProvider, get_available_kokoro_voices
-from providers.styletts2 import StyleTTSProvider, get_available_styletts_models
+from model_provider import StyleTTSProvider, get_available_styletts_models
 
 _LOGGER = logging.getLogger(__name__)
 app = FastAPI(
@@ -62,7 +60,7 @@ async def list_models():
     """
 
     return {
-            "available_models": STYLETTS:MODELS,
+            "available_models": STYLETTS_MODELS,
     }
 
 
@@ -100,8 +98,9 @@ async def synthesize_audio(data: SynthesizeModel):
         if model_name in STYLETTS_MODELS:
             global STYLETTS_PROVIDER
             if STYLETTS_PROVIDER is None:
-                STYLETTS_PROVIDER = StyleTTSProvider()
+                STYLETTS_PROVIDER = StyleTTSProvider(model_name)
 
+            
             STYLETTS_PROVIDER.synthesize(text=text, out_wav_path=output_path, voice=model_name)
         subprocess.run(
             ["ffmpeg", "-i", str(output_path), "-ar", sample_rate, "-y", str(output_8khz_path)],
@@ -138,9 +137,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="0.0.0.0", help="HTTP server host")
     parser.add_argument("--port", type=int, default=3333, help="HTTP server port")
-    parser.add_argument("--cuda", action="store_true", help="Use GPU")
-    parser.add_argument("--data-dir", action="append", default=["./models/styletts"],
-                        help="Directory for trained  models")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     global args
@@ -148,9 +144,6 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
     _LOGGER.debug("Parsed args: %s", args)
-
-    if not args.download_dir:
-        args.download_dir = args.data_dir[0]
 
     global STYLETTS_MODELS
     STYLETTS_MODELS = get_available_styletts_models()
