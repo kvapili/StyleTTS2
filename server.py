@@ -103,7 +103,7 @@ async def synthesize_audio(data: SynthesizeModel):
             
             STYLETTS_PROVIDER.synthesize(text=text, out_wav_path=output_path, voice=model_name)
         subprocess.run(
-            ["ffmpeg", "-i", str(output_path), "-ar", sample_rate, "-y", str(output_8khz_path)],
+            ["ffmpeg", "-i", str(output_path), "-ar", sample_rate, "-y", str(output_8khz_path), "-loglevel", "error"],
             check=True
         )
 
